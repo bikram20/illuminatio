@@ -1,0 +1,23 @@
+# Create 1 block of specification per test case.
+
+# src_type: pod, namespace
+# src_namespace: namespace name
+# src_selector: A dict of labels (and condition)
+# dest_type: pod, namespace, or cidr
+# dest_namespace: namespace name. It is blank of destination is external.
+# dest_selector: A dict of labels (and condition), or cidr
+# ports: '*' or a single port
+# action: allow, or deny
+
+---
+
+src_type: pod
+src_namespace: 01-deny-all-traffic-to-an-application
+src_selector: {app: "web"}
+dest_type: pod
+dest_namespace: 01-deny-all-traffic-to-an-application
+dest_selector: {app: "web"}
+ports: '*'
+action: deny
+
+---

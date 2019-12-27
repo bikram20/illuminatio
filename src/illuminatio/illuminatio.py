@@ -16,7 +16,7 @@ from illuminatio.test_generator import NetworkTestCaseGenerator
 from illuminatio.test_orchestrator import NetworkTestOrchestrator
 from illuminatio.util import CLEANUP_ALWAYS, CLEANUP_ON_REQUEST
 from termcolor import colored
-
+from illuminatio.manual_cases import parse_manual_tests
 
 LOGGER = logging.getLogger(__name__)
 click_log.basic_config(LOGGER)
@@ -56,7 +56,9 @@ def cli(incluster, kubeconfig):
               help='Runner image used by illuminatio')
 @click.option('-t', '--target-image', default="nginx:stable",
               help='Target image that is used to generate pods (should have a webserver inside listening on port 80)')
-def run(outfile, brief, dry, runner_image, target_image):
+@click.option('-i', '--test-cases', default=None, 
+              help='File containing the test cases for execution. Automatic test case generation is disabled if this option is chosen.')
+def run(outfile, brief, dry, runner_image, target_image, test_cases):
     """
     Create and execute test cases for NetworkPolicies currently in cluster.
     """
@@ -74,10 +76,16 @@ def run(outfile, brief, dry, runner_image, target_image):
     net_pols = v1net.list_network_policy_for_all_namespaces()
     runtimes["resource-pull"] = time.time() - start_time
 
-    # Generate Test cases
-    generator = NetworkTestCaseGenerator(LOGGER)
-    cases, gen_run_times = generator.generate_test_cases(net_pols.items, orch.current_namespaces)
-    LOGGER.debug("Got cases: %s", cases)
+    if test_cases:
+        # Use provided test cases file
+        LOGGER.info("User provided test cases file: %s" % test_cases)
+        cases = parse_manual_tests(test_cases, LOGGER)
+    else:
+        # Generate Test cases automatically
+        generator = NetworkTestCaseGenerator(LOGGER)
+        cases, gen_run_times = generator.generate_test_cases(net_pols.items, orch.current_namespaces)
+    
+    LOGGER.info("Got cases: %s", cases)
     case_time = time.time()
     runtimes["generate"] = case_time - start_time
     render_cases(cases, case_time - start_time)

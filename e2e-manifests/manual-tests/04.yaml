@@ -1,0 +1,35 @@
+# Create 1 block of specification per test case.
+
+# src_type: pod, namespace
+# src_namespace: namespace name
+# src_selector: A dict of labels (and condition)
+# dest_type: pod, namespace, or cidr
+# dest_namespace: namespace name. It is blank of destination is external.
+# dest_selector: A dict of labels (and condition), or cidr
+# ports: '*' or a single port
+# action: allow, or deny
+
+---
+
+src_type: pod
+src_namespace: illuminatio-inverted-secondary
+src_selector: {}
+dest_type: pod
+dest_namespace: secondary
+dest_selector: {}
+ports: '*'
+action: deny
+
+---
+
+
+src_type: pod
+src_namespace: secondary
+src_selector: {}
+dest_type: pod
+dest_namespace: secondary
+dest_selector: {}
+ports: '*'
+action: allow
+
+---
